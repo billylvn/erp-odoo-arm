@@ -22,54 +22,68 @@ Koleksi custom module Odoo 18 milik Creativin.
 
 ## Menambah Module Baru
 
-1. Buat folder di root repo dengan struktur minimal:
 ```
 cl_nama_module/
 ├── __init__.py
-├── __manifest__.py   ← version: '18.0.1.0.0', depends: [...]
+├── __manifest__.py   ← version: '18.0.1.0.0'
 ├── models/
 ├── views/
 └── security/
 ```
 
-2. Restart Odoo, lalu install via **Apps → Update Apps List**
+Setelah push: CI/CD otomatis pull & restart. Install manual via **Apps → Update Apps List**.
 
 ---
 
-## Development & Deployment
+## CI/CD
 
-Docker setup ada di repo terpisah: **`erp-odoo-docker`**
+Push ke `main` → GitHub Actions otomatis:
 
-Repo ini di-mount langsung ke container sebagai `/mnt/extra-addons` — tidak perlu rebuild Docker image saat tambah/edit module, cukup restart Odoo.
+1. Detect modul mana yang berubah
+2. SSH ke server → `git pull`
+3. `docker compose restart web`
+4. Jika ada perubahan `.py` → jalankan upgrade modul (`-u <module>`)
 
-### Local
+### Setup (sekali saja)
+
+Tambahkan secrets berikut di **GitHub → Settings → Secrets → Actions**:
+
+| Secret | Nilai |
+|--------|-------|
+| `SSH_HOST` | IP atau domain server |
+| `SSH_USER` | Username SSH (misal `ubuntu`) |
+| `SSH_PRIVATE_KEY` | Private key untuk SSH ke server |
+| `SSH_PORT` | Port SSH (default `22`) |
+| `ADDONS_PATH` | Path repo ini di server (misal `/opt/erp-odoo-arm`) |
+| `DOCKER_PATH` | Path docker repo di server (misal `/opt/arm-odoo-docker`) |
+| `ODOO_DB` | Nama database Odoo di server |
+
+### Setup server (pertama kali)
 
 ```bash
-cd erp-odoo-docker
+# Di server
+git clone <erp-odoo-arm-url> /opt/erp-odoo-arm
+git clone <docker-repo-url>  /opt/arm-odoo-docker
+
+cd /opt/arm-odoo-docker
+cp .env.example .env && nano .env
 docker compose up -d
-docker compose restart web   # setelah edit module
 ```
 
-### Deploy ke Server
+Tambahkan public key GitHub Actions ke `~/.ssh/authorized_keys` di server.
+
+---
+
+## Development Lokal
 
 ```bash
-# Di server — pertama kali
-git clone <erp-odoo-arm-url>
-git clone <erp-odoo-docker-url>
-
-cd erp-odoo-docker
-cp .env.example .env
-nano .env   # sesuaikan ADDONS_PATH dan ENTERPRISE_PATH ke path di server
-
-docker compose build
+cd /path/to/arm-odoo-docker
 docker compose up -d
+docker compose restart web        # setelah edit module
 ```
 
-### Update module di server
-
+Upgrade manual jika ada perubahan model:
 ```bash
-cd erp-odoo-arm && git pull
-cd ../erp-odoo-docker && docker compose restart web
-# Jika ada perubahan model (field baru/hapus):
-docker compose exec web odoo -c /etc/odoo/odoo.conf -d <db> -u <module> --stop-after-init
+docker compose exec web odoo -c /etc/odoo/odoo.conf \
+  -d <database> -u <module> --stop-after-init
 ```

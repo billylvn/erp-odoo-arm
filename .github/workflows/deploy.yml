@@ -1,0 +1,86 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Pull & Restart Odoo
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout with history so we can diff changes ─────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      # ── 2. Detect which modules changed ─────────────────────────────────────
+      - name: Detect changed modules
+        id: changes
+        run: |
+          echo "=== Files changed ==="
+          git diff --name-only HEAD~1 HEAD
+
+          # Top-level directories that changed = module names
+          CHANGED_MODULES=$(git diff --name-only HEAD~1 HEAD \
+            | grep '/' \
+            | cut -d'/' -f1 \
+            | sort -u \
+            | tr '\n' ' ')
+          echo "Changed modules: $CHANGED_MODULES"
+
+          # Modules that need -u upgrade = has .py file changes (model/logic change)
+          UPGRADE_MODULES=""
+          for module in $CHANGED_MODULES; do
+            if git diff --name-only HEAD~1 HEAD | grep -qE "^${module}/.*\.py$"; then
+              UPGRADE_MODULES="$UPGRADE_MODULES$module,"
+            fi
+          done
+          # Remove trailing comma
+          UPGRADE_MODULES="${UPGRADE_MODULES%,}"
+
+          echo "Modules to upgrade: $UPGRADE_MODULES"
+          echo "upgrade=$UPGRADE_MODULES" >> $GITHUB_OUTPUT
+
+      # ── 3. SSH to server, pull & restart ────────────────────────────────────
+      - name: Deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            set -e
+
+            echo ">>> Pulling latest modules..."
+            cd ${{ secrets.ADDONS_PATH }}
+            git pull origin main
+
+            echo ">>> Restarting Odoo..."
+            cd ${{ secrets.DOCKER_PATH }}
+            docker compose restart web
+
+            # Wait for Odoo to come up
+            sleep 10
+
+            # ── Upgrade modules with Python changes ───────────────────────────
+            UPGRADE="${{ steps.changes.outputs.upgrade }}"
+            if [ -n "$UPGRADE" ]; then
+              echo ">>> Upgrading modules: $UPGRADE"
+              docker compose exec -T web odoo \
+                -c /etc/odoo/odoo.conf \
+                -d ${{ secrets.ODOO_DB }} \
+                -u "$UPGRADE" \
+                --stop-after-init
+
+              echo ">>> Restarting after upgrade..."
+              docker compose restart web
+              echo ">>> Upgrade complete."
+            else
+              echo ">>> No Python changes — skipping upgrade."
+            fi
+
+            echo ">>> Deploy done."
