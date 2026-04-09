@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Cloudbeds Integration',
-    'version': '19.0.1.0.0',
+    'version': '18.0.1.0.0',
     'category': 'Accounting/Accounting',
     'summary': (
-        'Full Odoo 19 integration with Cloudbeds: reservations, '
+        'Full Odoo 18 integration with Cloudbeds: reservations, '
         'invoices, payments, guests, products, and financial reporting.'
     ),
     'description': """
 Cloudbeds Integration
 =====================
-Connect Odoo 19 with Cloudbeds hotel management system end-to-end.
+Connect Odoo 18 with Cloudbeds hotel management system end-to-end.
 
 **Accounting**
 * Import Cloudbeds reservations → Odoo invoices automatically on checkout

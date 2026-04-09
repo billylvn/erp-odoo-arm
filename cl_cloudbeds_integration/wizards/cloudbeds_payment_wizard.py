@@ -203,7 +203,7 @@ class CloudbedsPaymentWizard(models.TransientModel):
                         lambda l: l.account_id.account_type == 'asset_receivable'
                         and not l.reconciled
                     )
-                    pay_receivable = payment.line_ids.filtered(
+                    pay_receivable = payment.move_id.line_ids.filtered(
                         lambda l: l.account_id.account_type == 'asset_receivable'
                         and not l.reconciled
                     )

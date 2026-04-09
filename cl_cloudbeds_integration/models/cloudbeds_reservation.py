@@ -14,7 +14,6 @@ Full accounting pipeline:
 """
 import json
 import logging
-from venv import logger
 from odoo import _, api, fields, models, Command
 from odoo.exceptions import UserError
 from decimal import Decimal, ROUND_DOWN
@@ -778,39 +777,25 @@ class CloudbedsReservation(models.Model):
         try:
             payment = self.env['account.payment'].create(payment_vals)
             payment.action_post()
-            payment.action_validate()
             _logger.info(
                 'Created payment for reservation %s: %s (%s)',
                 self.cb_reservation_id, payment.name, amount,
             )
-            # Reconcile payment with invoice
-            if payment.move_id:
-                pass
-            else:
-                payment.move_id = self.env['account.move'].create({
-                    'journal_id': payment.journal_id.id,
-                    'partner_id': payment.partner_id.id,
-                    'date': payment.date,
-                    'currency_id': payment.currency_id.id,
-                    'line_ids': [Command.create({
-                        'account_id': payment.journal_id.default_account_id.id,
-                        'debit': payment.amount,
-                        'credit': 0,
-                    }),
-                    Command.create({
-                        'account_id': payment.partner_id.property_account_receivable_id.id,
-                        'debit': 0,
-                        'credit': payment.amount,
-                    }),
-                    ]
-                })
-                payment.move_id.action_post()
-                _logger.info('Created payment move for reservation %s: %s', self.cb_reservation_id, payment.move_id.name)
-                payment_line_to_reconcile = payment.move_id.line_ids[-1]
-                invoice_line_to_reconcile = invoice.line_ids.filtered(lambda x: x.account_id.id == payment.partner_id.property_account_receivable_id.id)
-                if payment_line_to_reconcile and invoice_line_to_reconcile:
-                    (payment_line_to_reconcile + invoice_line_to_reconcile).reconcile()
-                    _logger.info('Reconciled payment %s with invoice %s', payment.move_id.name, invoice.name)
+            # Reconcile payment with invoice via receivable lines
+            inv_receivable = invoice.line_ids.filtered(
+                lambda l: l.account_id.account_type == 'asset_receivable'
+                and not l.reconciled
+            )
+            pay_receivable = payment.move_id.line_ids.filtered(
+                lambda l: l.account_id.account_type == 'asset_receivable'
+                and not l.reconciled
+            )
+            if inv_receivable and pay_receivable:
+                (inv_receivable + pay_receivable).reconcile()
+                _logger.info(
+                    'Reconciled payment %s with invoice %s',
+                    payment.name, invoice.name,
+                )
 
             return payment
         except Exception as exc:
