@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         cloudbeds.sync.wizard — Form View (dialog)
+    ============================================================ -->
+    <record id="view_cloudbeds_sync_wizard_form" model="ir.ui.view">
+        <field name="name">cloudbeds.sync.wizard.form</field>
+        <field name="model">cloudbeds.sync.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Manual Sync">
+                <group string="Backend">
+                    <field name="backend_id"/>
+                </group>
+                <group string="What to Sync">
+                    <field name="sync_guests"/>
+                    <field name="sync_products"/>
+                    <field name="sync_reservations"/>
+                </group>
+                <group string="Reservation Options" invisible="not sync_reservations">
+                    <field name="reservation_status"/>
+                    <field name="results_from"/>
+                    <field name="results_to"/>
+                </group>
+                <footer>
+                    <button name="action_run_sync"
+                            string="Run Sync"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Window Action — Manual Sync Wizard
+    ============================================================ -->
+    <record id="action_cloudbeds_sync_wizard" model="ir.actions.act_window">
+        <field name="name">Manual Sync</field>
+        <field name="res_model">cloudbeds.sync.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ============================================================
+         cloudbeds.payment.wizard — Form View (dialog)
+    ============================================================ -->
+    <record id="view_cloudbeds_payment_wizard_form" model="ir.ui.view">
+        <field name="name">cloudbeds.payment.wizard.form</field>
+        <field name="model">cloudbeds.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Register Payment to Cloudbeds">
+                <!-- Current balance summary -->
+                <group string="Reservation Summary">
+                    <group>
+                        <field name="reservation_id" readonly="1"/>
+                        <field name="cb_reservation_id" readonly="1"/>
+                        <field name="cb_guest_name" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="cb_total_amount" readonly="1"/>
+                        <field name="cb_total_paid" readonly="1"/>
+                        <field name="cb_balance" readonly="1"
+                               class="fw-bold text-danger"/>
+                    </group>
+                </group>
+
+                <!-- Payment entry -->
+                <group string="Payment Details">
+                    <field name="amount"/>
+                    <field name="payment_type"/>
+                    <field name="card_type"
+                           invisible="payment_type != 'credit'"
+                           required="payment_type == 'credit'"/>
+                    <field name="description" placeholder="e.g. Cash payment at front desk"/>
+                </group>
+
+                <!-- Odoo-side options -->
+                <group string="Odoo Options">
+                    <field name="register_in_odoo"/>
+                    <field name="journal_id"
+                           invisible="not register_in_odoo"
+                           required="register_in_odoo"/>
+                </group>
+
+                <footer>
+                    <button name="action_confirm"
+                            string="Register Payment"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

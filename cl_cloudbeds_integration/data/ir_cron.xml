@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Scheduled action: sync all active, connected Cloudbeds backends.
+        Default: every 15 minutes. Adjustable from Settings → Technical → Scheduled Actions.
+    -->
+    <record id="ir_cron_cloudbeds_sync_all" model="ir.cron">
+        <field name="name">Cloudbeds: Auto Sync All Backends</field>
+        <field name="model_id" ref="model_cloudbeds_backend"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_sync_all()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+        <field name="priority">5</field>
+    </record>
+
+</odoo>

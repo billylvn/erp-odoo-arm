@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cloudbeds_backend_manager,cloudbeds.backend manager,model_cloudbeds_backend,base.group_system,1,1,1,1
+access_cloudbeds_backend_user,cloudbeds.backend user,model_cloudbeds_backend,base.group_user,1,0,0,0
+access_cloudbeds_sync_log_manager,cloudbeds.sync.log manager,model_cloudbeds_sync_log,base.group_system,1,1,1,1
+access_cloudbeds_sync_log_user,cloudbeds.sync.log user,model_cloudbeds_sync_log,base.group_user,1,0,0,0
+access_cloudbeds_tax_mapping_manager,cloudbeds.tax.mapping manager,model_cloudbeds_tax_mapping,base.group_system,1,1,1,1
+access_cloudbeds_tax_mapping_user,cloudbeds.tax.mapping user,model_cloudbeds_tax_mapping,base.group_user,1,0,0,0
+access_cloudbeds_payment_method_manager,cloudbeds.payment.method manager,model_cloudbeds_payment_method,base.group_system,1,1,1,1
+access_cloudbeds_payment_method_user,cloudbeds.payment.method user,model_cloudbeds_payment_method,base.group_user,1,0,0,0
+access_cloudbeds_reservation_manager,cloudbeds.reservation manager,model_cloudbeds_reservation,base.group_system,1,1,1,1
+access_cloudbeds_reservation_user,cloudbeds.reservation user,model_cloudbeds_reservation,base.group_user,1,0,0,0
+access_cloudbeds_sync_wizard_user,cloudbeds.sync.wizard user,model_cloudbeds_sync_wizard,base.group_user,1,1,1,1
+access_cloudbeds_payment_wizard_user,cloudbeds.payment.wizard user,model_cloudbeds_payment_wizard,base.group_user,1,1,1,1

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         res.partner — Form Extension (adds CB guest fields)
+    ============================================================ -->
+    <record id="view_partner_form_cloudbeds" model="ir.ui.view">
+        <field name="name">res.partner.form.cloudbeds</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Cloudbeds" name="cloudbeds"
+                      invisible="not cb_guest_id">
+                    <group string="Cloudbeds Guest Info">
+                        <field name="cb_guest_id" readonly="1"/>
+                        <field name="cb_backend_id" readonly="1"/>
+                        <field name="cb_sync_date" readonly="1"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Cloudbeds Guests — separate list view
+    ============================================================ -->
+    <record id="view_cloudbeds_guests_list" model="ir.ui.view">
+        <field name="name">cloudbeds.guest.list</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <list string="Cloudbeds Guests">
+                <field name="name"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="city"/>
+                <field name="country_id"/>
+                <field name="cb_guest_id" string="CB Guest ID"/>
+                <field name="cb_backend_id" string="Backend"/>
+                <field name="cb_sync_date" string="Last Sync"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Window Action — Cloudbeds Guests
+    ============================================================ -->
+    <record id="action_cloudbeds_guests" model="ir.actions.act_window">
+        <field name="name">Guests</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_cloudbeds_guests_list')})]"/>
+        <field name="domain">[('cb_guest_id', '!=', False)]</field>
+        <field name="context">{'create': False, 'edit': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Cloudbeds guests synced yet.
+            </p>
+            <p>
+                Sync guests from the backend configuration to import guest records.
+            </p>
+        </field>
+    </record>
+
+</odoo>

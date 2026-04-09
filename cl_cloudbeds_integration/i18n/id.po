@@ -1,0 +1,658 @@
+# Indonesian translation for cl_cloudbeds_integration
+# Copyright (C) 2026 Creativin Labs
+# This file is distributed under the same license as the cl_cloudbeds_integration module.
+# Creativin Labs <info@creativin-labs.com>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-31 00:00+0000\n"
+"PO-Revision-Date: 2026-03-31 00:00+0000\n"
+"Last-Translator: Creativin Labs <info@creativin-labs.com>\n"
+"Language-Team: Indonesian\n"
+"Language: id\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+# ── Module name / summary ─────────────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Integration"
+msgstr "Integrasi Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Full Odoo 19 integration with Cloudbeds: reservations, invoices, payments, guests, products, and financial reporting."
+msgstr "Integrasi penuh Odoo 19 dengan Cloudbeds: reservasi, faktur, pembayaran, tamu, produk, dan laporan keuangan."
+
+# ── Menu names ────────────────────────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds"
+msgstr "Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Operations"
+msgstr "Operasional"
+
+#. module: cl_cloudbeds_integration
+msgid "Reservations"
+msgstr "Reservasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Guests"
+msgstr "Tamu"
+
+#. module: cl_cloudbeds_integration
+msgid "Linked Products"
+msgstr "Produk Terhubung"
+
+#. module: cl_cloudbeds_integration
+msgid "Manual Sync"
+msgstr "Sinkronisasi Manual"
+
+#. module: cl_cloudbeds_integration
+msgid "Reports"
+msgstr "Laporan"
+
+#. module: cl_cloudbeds_integration
+msgid "Sync Logs"
+msgstr "Log Sinkronisasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Configuration"
+msgstr "Konfigurasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Backends"
+msgstr "Backend"
+
+# ── Model names ───────────────────────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Backend"
+msgstr "Backend Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Backends"
+msgstr "Backend Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Reservation"
+msgstr "Reservasi Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Sync Log"
+msgstr "Log Sinkronisasi Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Tax Mapping"
+msgstr "Pemetaan Pajak Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Payment Method Mapping"
+msgstr "Pemetaan Metode Pembayaran Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Manual Sync Wizard"
+msgstr "Wizard Sinkronisasi Manual Cloudbeds"
+
+# ── cloudbeds.backend fields ─────────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Backend Name"
+msgstr "Nama Backend"
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Property ID"
+msgstr "ID Properti Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "OAuth Client ID"
+msgstr "Client ID OAuth"
+
+#. module: cl_cloudbeds_integration
+msgid "OAuth Client Secret"
+msgstr "Client Secret OAuth"
+
+#. module: cl_cloudbeds_integration
+msgid "Access Token"
+msgstr "Token Akses"
+
+#. module: cl_cloudbeds_integration
+msgid "Refresh Token"
+msgstr "Token Pembaruan"
+
+#. module: cl_cloudbeds_integration
+msgid "Status"
+msgstr "Status"
+
+#. module: cl_cloudbeds_integration
+msgid "Last Sync"
+msgstr "Sinkronisasi Terakhir"
+
+#. module: cl_cloudbeds_integration
+msgid "Last Error"
+msgstr "Error Terakhir"
+
+#. module: cl_cloudbeds_integration
+msgid "Sync Guests"
+msgstr "Sinkronisasi Tamu"
+
+#. module: cl_cloudbeds_integration
+msgid "Sync Products"
+msgstr "Sinkronisasi Produk"
+
+#. module: cl_cloudbeds_integration
+msgid "Sync Reservations"
+msgstr "Sinkronisasi Reservasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Auto-Invoice on Checkout"
+msgstr "Faktur Otomatis saat Check-Out"
+
+#. module: cl_cloudbeds_integration
+msgid "Auto-Confirm Invoices"
+msgstr "Konfirmasi Faktur Otomatis"
+
+#. module: cl_cloudbeds_integration
+msgid "Auto-Register Payments"
+msgstr "Catat Pembayaran Otomatis"
+
+#. module: cl_cloudbeds_integration
+msgid "Revenue Journal"
+msgstr "Jurnal Pendapatan"
+
+#. module: cl_cloudbeds_integration
+msgid "Tax Mappings"
+msgstr "Pemetaan Pajak"
+
+#. module: cl_cloudbeds_integration
+msgid "Payment Method Mappings"
+msgstr "Pemetaan Metode Pembayaran"
+
+# ── cloudbeds.backend state selection ────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Not Connected"
+msgstr "Belum Terhubung"
+
+#. module: cl_cloudbeds_integration
+msgid "Connected"
+msgstr "Terhubung"
+
+#. module: cl_cloudbeds_integration
+msgid "Error"
+msgstr "Error"
+
+# ── cloudbeds.backend buttons ────────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Connect to Cloudbeds"
+msgstr "Hubungkan ke Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Test Connection"
+msgstr "Uji Koneksi"
+
+#. module: cl_cloudbeds_integration
+msgid "Sync Now"
+msgstr "Sinkronisasi Sekarang"
+
+#. module: cl_cloudbeds_integration
+msgid "Register Webhooks"
+msgstr "Daftarkan Webhook"
+
+#. module: cl_cloudbeds_integration
+msgid "Connection Successful"
+msgstr "Koneksi Berhasil"
+
+# ── cloudbeds.reservation fields ────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Reservation ID"
+msgstr "ID Reservasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Backend"
+msgstr "Backend"
+
+#. module: cl_cloudbeds_integration
+msgid "CB Reservation ID"
+msgstr "ID Reservasi CB"
+
+#. module: cl_cloudbeds_integration
+msgid "CB Status"
+msgstr "Status CB"
+
+#. module: cl_cloudbeds_integration
+msgid "Check-In"
+msgstr "Check-In"
+
+#. module: cl_cloudbeds_integration
+msgid "Check-Out"
+msgstr "Check-Out"
+
+#. module: cl_cloudbeds_integration
+msgid "CB Guest ID"
+msgstr "ID Tamu CB"
+
+#. module: cl_cloudbeds_integration
+msgid "Guest Name"
+msgstr "Nama Tamu"
+
+#. module: cl_cloudbeds_integration
+msgid "Total Amount"
+msgstr "Total Jumlah"
+
+#. module: cl_cloudbeds_integration
+msgid "Total Paid"
+msgstr "Total Dibayar"
+
+#. module: cl_cloudbeds_integration
+msgid "Balance"
+msgstr "Saldo"
+
+#. module: cl_cloudbeds_integration
+msgid "Raw Invoice Data (JSON)"
+msgstr "Data Faktur Mentah (JSON)"
+
+#. module: cl_cloudbeds_integration
+msgid "Odoo Status"
+msgstr "Status Odoo"
+
+#. module: cl_cloudbeds_integration
+msgid "Error Message"
+msgstr "Pesan Error"
+
+#. module: cl_cloudbeds_integration
+msgid "Partner"
+msgstr "Mitra"
+
+#. module: cl_cloudbeds_integration
+msgid "Sale Order"
+msgstr "Pesanan Penjualan"
+
+#. module: cl_cloudbeds_integration
+msgid "Invoice"
+msgstr "Faktur"
+
+#. module: cl_cloudbeds_integration
+msgid "Payments"
+msgstr "Pembayaran"
+
+# ── Reservation CB status selection ──────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Not Confirmed"
+msgstr "Belum Dikonfirmasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Confirmed"
+msgstr "Dikonfirmasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Checked In"
+msgstr "Sudah Check-In"
+
+#. module: cl_cloudbeds_integration
+msgid "Checked Out"
+msgstr "Sudah Check-Out"
+
+#. module: cl_cloudbeds_integration
+msgid "Cancelled"
+msgstr "Dibatalkan"
+
+#. module: cl_cloudbeds_integration
+msgid "No Show"
+msgstr "Tidak Hadir"
+
+# ── Reservation Odoo state selection ─────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Pending"
+msgstr "Menunggu"
+
+#. module: cl_cloudbeds_integration
+msgid "Imported"
+msgstr "Diimpor"
+
+# ── cloudbeds.sync.log fields ────────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Sync Type"
+msgstr "Tipe Sinkronisasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Direction"
+msgstr "Arah"
+
+#. module: cl_cloudbeds_integration
+msgid "Result"
+msgstr "Hasil"
+
+#. module: cl_cloudbeds_integration
+msgid "Processed"
+msgstr "Diproses"
+
+#. module: cl_cloudbeds_integration
+msgid "Failed"
+msgstr "Gagal"
+
+#. module: cl_cloudbeds_integration
+msgid "Message / Error"
+msgstr "Pesan / Error"
+
+#. module: cl_cloudbeds_integration
+msgid "Timestamp"
+msgstr "Waktu"
+
+# ── sync.log sync_type selection ─────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Reservation"
+msgstr "Reservasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Guest"
+msgstr "Tamu"
+
+#. module: cl_cloudbeds_integration
+msgid "Product"
+msgstr "Produk"
+
+#. module: cl_cloudbeds_integration
+msgid "Payment"
+msgstr "Pembayaran"
+
+#. module: cl_cloudbeds_integration
+msgid "Webhook"
+msgstr "Webhook"
+
+# ── sync.log direction selection ─────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds → Odoo"
+msgstr "Cloudbeds → Odoo"
+
+#. module: cl_cloudbeds_integration
+msgid "Odoo → Cloudbeds"
+msgstr "Odoo → Cloudbeds"
+
+# ── sync.log state selection ─────────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Success"
+msgstr "Berhasil"
+
+#. module: cl_cloudbeds_integration
+msgid "Partial"
+msgstr "Sebagian"
+
+# ── cloudbeds.tax.mapping fields ─────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Tax ID"
+msgstr "ID Pajak Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Tax Name"
+msgstr "Nama Pajak Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Odoo Tax"
+msgstr "Pajak Odoo"
+
+# ── cloudbeds.payment.method fields ──────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Payment Type"
+msgstr "Tipe Pembayaran Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Odoo Journal"
+msgstr "Jurnal Odoo"
+
+# ── product extension fields ──────────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Item ID"
+msgstr "ID Item Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Backend"
+msgstr "Backend Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Last CB Sync"
+msgstr "Sinkronisasi CB Terakhir"
+
+# ── res.partner extension fields ─────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Guest ID"
+msgstr "ID Tamu Cloudbeds"
+
+# ── wizard fields ─────────────────────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Reservation Filter"
+msgstr "Filter Reservasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Checked-Out Only"
+msgstr "Hanya yang Check-Out"
+
+#. module: cl_cloudbeds_integration
+msgid "All Statuses"
+msgstr "Semua Status"
+
+#. module: cl_cloudbeds_integration
+msgid "Date From"
+msgstr "Dari Tanggal"
+
+#. module: cl_cloudbeds_integration
+msgid "Date To"
+msgstr "Sampai Tanggal"
+
+#. module: cl_cloudbeds_integration
+msgid "Run Sync"
+msgstr "Jalankan Sinkronisasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Sync Complete"
+msgstr "Sinkronisasi Selesai"
+
+#. module: cl_cloudbeds_integration
+msgid "Guests synced."
+msgstr "Tamu berhasil disinkronisasi."
+
+#. module: cl_cloudbeds_integration
+msgid "Products synced."
+msgstr "Produk berhasil disinkronisasi."
+
+# ── view titles & tab names ───────────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Backend"
+msgstr "Backend Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Connection"
+msgstr "Koneksi"
+
+#. module: cl_cloudbeds_integration
+msgid "Accounting"
+msgstr "Akuntansi"
+
+#. module: cl_cloudbeds_integration
+msgid "Sync Settings"
+msgstr "Pengaturan Sinkronisasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Token Info"
+msgstr "Info Token"
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Guests"
+msgstr "Tamu Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Linked Products"
+msgstr "Produk Terhubung Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Manual Sync"
+msgstr "Sinkronisasi Manual"
+
+#. module: cl_cloudbeds_integration
+msgid "Log Details"
+msgstr "Detail Log"
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds Info"
+msgstr "Info Cloudbeds"
+
+#. module: cl_cloudbeds_integration
+msgid "Financial Summary"
+msgstr "Ringkasan Keuangan"
+
+#. module: cl_cloudbeds_integration
+msgid "Odoo Links"
+msgstr "Tautan Odoo"
+
+#. module: cl_cloudbeds_integration
+msgid "Raw Data"
+msgstr "Data Mentah"
+
+# ── search filter labels ──────────────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Checked Out"
+msgstr "Sudah Check-Out"
+
+#. module: cl_cloudbeds_integration
+msgid "Checked In"
+msgstr "Sudah Check-In"
+
+#. module: cl_cloudbeds_integration
+msgid "Cancelled"
+msgstr "Dibatalkan"
+
+#. module: cl_cloudbeds_integration
+msgid "Group By"
+msgstr "Kelompokkan Berdasarkan"
+
+#. module: cl_cloudbeds_integration
+msgid "CB Status"
+msgstr "Status CB"
+
+#. module: cl_cloudbeds_integration
+msgid "Odoo Status"
+msgstr "Status Odoo"
+
+#. module: cl_cloudbeds_integration
+msgid "Check-In Date"
+msgstr "Tanggal Check-In"
+
+#. module: cl_cloudbeds_integration
+msgid "Sync Type"
+msgstr "Tipe Sinkronisasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Date"
+msgstr "Tanggal"
+
+# ── cron ─────────────────────────────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds: Auto Sync All Backends"
+msgstr "Cloudbeds: Sinkronisasi Otomatis Semua Backend"
+
+# ── error/notification messages ───────────────────────────────────────
+
+#. module: cl_cloudbeds_integration
+msgid "Backend \"%s\" is not authenticated. Connect to Cloudbeds first."
+msgstr "Backend \"%s\" belum terautentikasi. Hubungkan ke Cloudbeds terlebih dahulu."
+
+#. module: cl_cloudbeds_integration
+msgid "Connection failed: %s"
+msgstr "Koneksi gagal: %s"
+
+#. module: cl_cloudbeds_integration
+msgid "Cloudbeds token is valid for property %s."
+msgstr "Token Cloudbeds valid untuk properti %s."
+
+#. module: cl_cloudbeds_integration
+msgid "Webhooks Registration"
+msgstr "Pendaftaran Webhook"
+
+#. module: cl_cloudbeds_integration
+msgid "Registered: %s"
+msgstr "Terdaftar: %s"
+
+#. module: cl_cloudbeds_integration
+msgid "No webhooks could be registered. Check errors."
+msgstr "Tidak ada webhook yang berhasil didaftarkan. Periksa log error."
+
+#. module: cl_cloudbeds_integration
+msgid "No sale order linked yet."
+msgstr "Belum ada pesanan penjualan yang terhubung."
+
+#. module: cl_cloudbeds_integration
+msgid "No invoice linked yet."
+msgstr "Belum ada faktur yang terhubung."
+
+#. module: cl_cloudbeds_integration
+msgid "Could not create invoice from sale order %s."
+msgstr "Tidak dapat membuat faktur dari pesanan penjualan %s."
+
+#. module: cl_cloudbeds_integration
+msgid "Processing Complete"
+msgstr "Pemrosesan Selesai"
+
+#. module: cl_cloudbeds_integration
+msgid "Selected reservations have been processed."
+msgstr "Reservasi yang dipilih telah diproses."
+
+#. module: cl_cloudbeds_integration
+msgid "Room Charge"
+msgstr "Biaya Kamar"
+
+#. module: cl_cloudbeds_integration
+msgid "Service Charge"
+msgstr "Biaya Layanan"
+
+#. module: cl_cloudbeds_integration
+msgid "Adjustment"
+msgstr "Penyesuaian"
+
+#. module: cl_cloudbeds_integration
+msgid "Reservation %s"
+msgstr "Reservasi %s"
+
+#. module: cl_cloudbeds_integration
+msgid "Reservation %s cancelled"
+msgstr "Reservasi %s dibatalkan"
+
+#. module: cl_cloudbeds_integration
+msgid "Process"
+msgstr "Proses"
+
+#. module: cl_cloudbeds_integration
+msgid "View Sale Order"
+msgstr "Lihat Pesanan Penjualan"
+
+#. module: cl_cloudbeds_integration
+msgid "View Invoice"
+msgstr "Lihat Faktur"
+
+#. module: cl_cloudbeds_integration
+msgid "What to Sync"
+msgstr "Yang Akan Disinkronisasi"
+
+#. module: cl_cloudbeds_integration
+msgid "Reservation Options"
+msgstr "Opsi Reservasi"

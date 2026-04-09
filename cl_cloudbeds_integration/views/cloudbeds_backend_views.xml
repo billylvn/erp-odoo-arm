@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         cloudbeds.backend — Form View
+    ============================================================ -->
+    <record id="view_cloudbeds_backend_form" model="ir.ui.view">
+        <field name="name">cloudbeds.backend.form</field>
+        <field name="model">cloudbeds.backend</field>
+        <field name="arch" type="xml">
+            <form string="Cloudbeds Backend">
+                <header>
+                    <!-- API Key connection (recommended) -->
+                    <button name="action_connect_api_key"
+                            string="Connect via API Key"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state == 'connected' or auth_method != 'api_key'"/>
+                    <!-- OAuth2 redirect flow -->
+                    <button name="action_connect"
+                            string="Connect via OAuth"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state == 'connected' or auth_method != 'oauth'"/>
+                    <button name="action_sync_all"
+                            string="Sync Now"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'connected'"/>
+                    <button name="action_test_connection"
+                            string="Test Connection"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state != 'connected'"/>
+                    <button name="action_sync_lookups"
+                            string="Refresh Lookups"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state != 'connected'"
+                            title="Re-import payment methods and taxes from Cloudbeds"/>
+                    <button name="action_register_webhooks"
+                            string="Register Webhooks"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state != 'connected'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,connected"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_reservations"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-bed"
+                                invisible="state != 'connected'">
+                            <field name="reservation_count" widget="statinfo" string="Reservations"/>
+                        </button>
+                        <button name="action_view_sync_logs"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-list">
+                            <field name="sync_log_count" widget="statinfo" string="Sync Logs"/>
+                        </button>
+                    </div>
+
+                    <widget name="web_ribbon"
+                            title="Error"
+                            bg_color="bg-danger"
+                            invisible="state != 'error'"/>
+
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Grand Hotel Jakarta"/>
+                        </h1>
+                    </div>
+
+                    <notebook>
+                        <!-- ── CONNECTION ──────────────────────── -->
+                        <page string="Connection" name="connection">
+                            <group>
+                                <group string="Property">
+                                    <field name="property_id" placeholder="e.g. 12345"/>
+                                    <field name="auth_method" widget="radio"/>
+                                </group>
+                                <group string="Status">
+                                    <field name="state" readonly="1"/>
+                                    <field name="last_sync" readonly="1"/>
+                                    <field name="last_error" readonly="1"
+                                           invisible="not last_error"/>
+                                </group>
+                            </group>
+                            <div class="alert alert-info" role="alert" invisible="auth_method != 'api_key'">
+                                Paste the <strong>cbat_...</strong> key from your
+                                Cloudbeds developer app. No redirect URI registration needed.
+                            </div>
+                            <div class="alert alert-warning" role="alert" invisible="auth_method != 'oauth'">
+                                Your Odoo callback URL must be registered in your Cloudbeds
+                                developer app before connecting:
+                                <code>[web.base.url]/cloudbeds/oauth/callback</code>
+                            </div>
+                            <!-- API Key fields -->
+                            <group string="API Key Authentication" invisible="auth_method != 'api_key'">
+                                <field name="api_key" password="True"
+                                       placeholder="cbat_..."/>
+                            </group>
+                            <!-- OAuth2 fields -->
+                            <group string="OAuth 2.0 Authentication" invisible="auth_method != 'oauth'">
+                                <field name="client_id"/>
+                                <field name="client_secret" password="True"/>
+                            </group>
+                        </page>
+
+                        <!-- ── ACCOUNTING ─────────────────────── -->
+                        <page string="Accounting" name="accounting">
+                            <group>
+                                <group string="Invoice Settings">
+                                    <field name="revenue_journal_id"/>
+                                    <field name="currency_id" options="{'create': False}"/>
+                                    <field name="auto_invoice_on_checkout"/>
+                                    <field name="auto_confirm_invoices"/>
+                                    <field name="auto_register_payments"/>
+                                </group>
+                                <group string="Product Mapping">
+                                    <field name="service_charge_product_id" />
+                                </group>
+                            </group>
+                            <separator string="Tax Mapping"/>
+                            <div class="alert alert-info" role="alert">
+                                Taxes are imported automatically from Cloudbeds on connect.
+                                Map each Cloudbeds tax to the correct <strong>Odoo Tax</strong> below.
+                            </div>
+                            <field name="tax_mapping_ids" nolabel="1">
+                                <list editable="bottom">
+                                    <field name="cb_tax_id" readonly="1"/>
+                                    <field name="cb_tax_name" readonly="1"/>
+                                    <field name="cb_tax_type" readonly="1" optional="show"/>
+                                    <field name="cb_tax_percentage" readonly="1" optional="show"/>
+                                    <field name="tax_id"/>
+                                </list>
+                            </field>
+                            <separator string="Payment Method Mapping"/>
+                            <div class="alert alert-info" role="alert">
+                                Payment methods are imported automatically from Cloudbeds on connect
+                                with a default journal assigned. Adjust journals as needed.
+                            </div>
+                            <field name="payment_method_ids" nolabel="1">
+                                <list editable="bottom">
+                                    <field name="cb_payment_method_id" readonly="1" optional="show"/>
+                                    <field name="cb_payment_method_name" readonly="1"/>
+                                    <field name="cb_payment_type" readonly="1"/>
+                                    <field name="journal_id"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- ── SYNC SETTINGS ─────────────────── -->
+                        <page string="Sync Settings" name="sync">
+                            <group>
+                                <group string="What to Sync">
+                                    <field name="sync_guests"/>
+                                    <field name="sync_products"/>
+                                    <field name="sync_reservations"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- ── TOKEN INFO ─────────────────────── -->
+                        <page string="Token Info" name="token_info"
+                              groups="base.group_system">
+                            <group>
+                                <field name="api_key" readonly="1" password="True"
+                                       invisible="auth_method != 'api_key'"/>
+                                <field name="access_token" readonly="1" password="True"
+                                       invisible="auth_method != 'oauth'"/>
+                                <field name="refresh_token" readonly="1" password="True"
+                                       invisible="auth_method != 'oauth'"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         cloudbeds.backend — List View
+    ============================================================ -->
+    <record id="view_cloudbeds_backend_list" model="ir.ui.view">
+        <field name="name">cloudbeds.backend.list</field>
+        <field name="model">cloudbeds.backend</field>
+        <field name="arch" type="xml">
+            <list string="Cloudbeds Backends" decoration-danger="state == 'error'">
+                <field name="name"/>
+                <field name="property_id"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'connected'"
+                       decoration-warning="state == 'draft'"
+                       decoration-danger="state == 'error'"/>
+                <field name="last_sync"/>
+                <field name="reservation_count" string="Reservations"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Window Action
+    ============================================================ -->
+    <record id="action_cloudbeds_backend" model="ir.actions.act_window">
+        <field name="name">Cloudbeds Backends</field>
+        <field name="res_model">cloudbeds.backend</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Cloudbeds backend configured yet.
+            </p>
+            <p>
+                Create a backend and connect it with your Cloudbeds property
+                to start syncing reservations, guests, and products.
+            </p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         cloudbeds.sync.log — List View
+    ============================================================ -->
+    <record id="view_cloudbeds_sync_log_list" model="ir.ui.view">
+        <field name="name">cloudbeds.sync.log.list</field>
+        <field name="model">cloudbeds.sync.log</field>
+        <field name="arch" type="xml">
+            <list string="Sync Logs"
+                  decoration-danger="state == 'error'"
+                  decoration-warning="state == 'partial'"
+                  decoration-success="state == 'success'"
+                  create="false" edit="false" delete="false">
+                <field name="create_date" string="Timestamp"/>
+                <field name="backend_id"/>
+                <field name="sync_type"/>
+                <field name="direction"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'success'"
+                       decoration-warning="state == 'partial'"
+                       decoration-danger="state == 'error'"/>
+                <field name="records_processed" string="Processed"/>
+                <field name="records_failed" string="Failed"/>
+                <field name="message" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         cloudbeds.sync.log — Form View
+    ============================================================ -->
+    <record id="view_cloudbeds_sync_log_form" model="ir.ui.view">
+        <field name="name">cloudbeds.sync.log.form</field>
+        <field name="model">cloudbeds.sync.log</field>
+        <field name="arch" type="xml">
+            <form string="Sync Log" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group string="Log Details">
+                            <field name="backend_id" readonly="1"/>
+                            <field name="create_date" string="Timestamp" readonly="1"/>
+                            <field name="sync_type" readonly="1"/>
+                            <field name="direction" readonly="1"/>
+                            <field name="state" readonly="1"/>
+                        </group>
+                        <group string="Results">
+                            <field name="records_processed" readonly="1"/>
+                            <field name="records_failed" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Message" invisible="not message">
+                        <field name="message" nolabel="1" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         cloudbeds.sync.log — Search View
+    ============================================================ -->
+    <record id="view_cloudbeds_sync_log_search" model="ir.ui.view">
+        <field name="name">cloudbeds.sync.log.search</field>
+        <field name="model">cloudbeds.sync.log</field>
+        <field name="arch" type="xml">
+            <search string="Search Sync Logs">
+                <field name="backend_id"/>
+                <separator/>
+                <filter name="filter_success" string="Success" domain="[('state', '=', 'success')]"/>
+                <filter name="filter_partial" string="Partial" domain="[('state', '=', 'partial')]"/>
+                <filter name="filter_error" string="Error" domain="[('state', '=', 'error')]"/>
+                <separator/>
+                <filter name="filter_reservation" string="Reservation"
+                        domain="[('sync_type', '=', 'reservation')]"/>
+                <filter name="filter_guest" string="Guest"
+                        domain="[('sync_type', '=', 'guest')]"/>
+                <filter name="filter_product" string="Product"
+                        domain="[('sync_type', '=', 'product')]"/>
+                <separator/>
+                <group>
+                    <filter name="group_backend" string="Backend"
+                            context="{'group_by': 'backend_id'}"/>
+                    <filter name="group_type" string="Sync Type"
+                            context="{'group_by': 'sync_type'}"/>
+                    <filter name="group_state" string="Result"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="group_date" string="Date"
+                            context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Window Action
+    ============================================================ -->
+    <record id="action_cloudbeds_sync_log" model="ir.actions.act_window">
+        <field name="name">Sync Logs</field>
+        <field name="res_model">cloudbeds.sync.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No sync logs yet.
+            </p>
+            <p>Sync logs will appear here after the first synchronization runs.</p>
+        </field>
+    </record>
+
+</odoo>

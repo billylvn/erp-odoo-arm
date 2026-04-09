@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         cloudbeds.reservation — List View
+    ============================================================ -->
+    <record id="view_cloudbeds_reservation_list" model="ir.ui.view">
+        <field name="name">cloudbeds.reservation.list</field>
+        <field name="model">cloudbeds.reservation</field>
+        <field name="arch" type="xml">
+            <list string="Cloudbeds Reservations"
+                  decoration-danger="state == 'error'"
+                  decoration-muted="cb_status in ('canceled', 'no_show')">
+                <field name="name"/>
+                <field name="cb_guest_name"/>
+                <field name="cb_check_in"/>
+                <field name="cb_check_out"/>
+                <field name="cb_status" widget="badge"
+                       decoration-success="cb_status == 'checked_out'"
+                       decoration-info="cb_status == 'checked_in'"
+                       decoration-warning="cb_status in ('confirmed', 'not_confirmed')"
+                       decoration-danger="cb_status in ('canceled', 'no_show')"/>
+                <field name="cb_total_amount" string="Total"/>
+                <field name="cb_balance" string="Balance"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'imported'"
+                       decoration-warning="state == 'pending'"
+                       decoration-danger="state == 'error'"/>
+                <field name="sale_order_id" string="Sale Order" optional="show"/>
+                <field name="invoice_id" string="Invoice" optional="show"/>
+                <field name="backend_id" optional="hide"/>
+                <button name="action_process"
+                        string="Process"
+                        type="object"
+                        icon="fa-play"
+                        invisible="state not in ('pending', 'error')"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         cloudbeds.reservation — Form View
+    ============================================================ -->
+    <record id="view_cloudbeds_reservation_form" model="ir.ui.view">
+        <field name="name">cloudbeds.reservation.form</field>
+        <field name="model">cloudbeds.reservation</field>
+        <field name="arch" type="xml">
+            <form string="Cloudbeds Reservation">
+                <header>
+                    <button name="action_process"
+                            string="Process"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state not in ('pending', 'error')"/>
+                    <button name="action_process"
+                            string="Re-Process"
+                            type="object"
+                            invisible="state != 'imported'"/>
+                    <button name="action_register_payment"
+                            string="Register Payment"
+                            type="object"
+                            class="btn-primary"
+                            invisible="cb_balance &lt;= 0"
+                            title="Register a new payment in Cloudbeds and Odoo"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="pending,imported"/>
+                </header>
+
+                <sheet>
+                    <widget name="web_ribbon"
+                            title="Error"
+                            bg_color="bg-danger"
+                            invisible="state != 'error'"/>
+
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <!-- Cloudbeds Info -->
+                        <group string="Cloudbeds Info">
+                            <field name="backend_id" readonly="1"/>
+                            <field name="cb_reservation_id" readonly="1"/>
+                            <field name="cb_status" readonly="1"/>
+                            <field name="cb_guest_id" readonly="1"/>
+                            <field name="cb_guest_name" readonly="1"/>
+                            <field name="cb_check_in" readonly="1"/>
+                            <field name="cb_check_out" readonly="1"/>
+                            <field name="last_sync" readonly="1"/>
+                        </group>
+                        <!-- Financial Summary -->
+                        <group string="Financial Summary">
+                            <field name="cb_total_amount" readonly="1"/>
+                            <field name="cb_total_paid" readonly="1"/>
+                            <field name="cb_balance" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Odoo Links">
+                        <field name="partner_id" readonly="1"/>
+                        <field name="sale_order_id" readonly="1"/>
+                        <field name="invoice_id" readonly="1"/>
+                        <field name="payment_ids" readonly="1" widget="many2many_tags"/>
+                    </group>
+
+                    <group string="Error" invisible="state != 'error'">
+                        <field name="error_message" readonly="1" nolabel="1"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Raw Data" name="raw_data">
+                            <field name="cb_raw_data" readonly="1" widget="code"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         cloudbeds.reservation — Search View
+    ============================================================ -->
+    <record id="view_cloudbeds_reservation_search" model="ir.ui.view">
+        <field name="name">cloudbeds.reservation.search</field>
+        <field name="model">cloudbeds.reservation</field>
+        <field name="arch" type="xml">
+            <search string="Search Reservations">
+                <field name="name" string="Reservation ID"/>
+                <field name="cb_guest_name" string="Guest Name"/>
+                <field name="backend_id"/>
+                <separator/>
+                <!-- Odoo State filters -->
+                <filter name="filter_pending" string="Pending" domain="[('state', '=', 'pending')]"/>
+                <filter name="filter_imported" string="Imported" domain="[('state', '=', 'imported')]"/>
+                <filter name="filter_error" string="Error" domain="[('state', '=', 'error')]"/>
+                <separator/>
+                <!-- CB Status filters -->
+                <filter name="filter_checked_out" string="Checked Out"
+                        domain="[('cb_status', '=', 'checked_out')]"/>
+                <filter name="filter_checked_in" string="Checked In"
+                        domain="[('cb_status', '=', 'checked_in')]"/>
+                <filter name="filter_confirmed" string="Confirmed"
+                        domain="[('cb_status', '=', 'confirmed')]"/>
+                <filter name="filter_canceled" string="Cancelled"
+                        domain="[('cb_status', '=', 'canceled')]"/>
+                <separator/>
+                <group>
+                    <filter name="group_backend" string="Backend"
+                            context="{'group_by': 'backend_id'}"/>
+                    <filter name="group_cb_status" string="CB Status"
+                            context="{'group_by': 'cb_status'}"/>
+                    <filter name="group_state" string="Odoo Status"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="group_check_in" string="Check-In Date"
+                            context="{'group_by': 'cb_check_in'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Window Action
+    ============================================================ -->
+    <record id="action_cloudbeds_reservation" model="ir.actions.act_window">
+        <field name="name">Reservations</field>
+        <field name="res_model">cloudbeds.reservation</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_pending': 1, 'create': False, 'edit': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No reservations imported yet.
+            </p>
+            <p>
+                Run a sync from the backend configuration to import reservations from Cloudbeds.
+            </p>
+        </field>
+    </record>
+
+</odoo>

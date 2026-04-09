@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Root — App Switcher -->
+    <menuitem id="menu_cloudbeds_root"
+              name="Cloudbeds"
+              web_icon="cl_cloudbeds_integration,static/description/icon.png"
+              sequence="82"/>
+
+    <!-- ── Operations ──────────────────────────────── -->
+    <menuitem id="menu_cloudbeds_operations"
+              name="Operations"
+              parent="menu_cloudbeds_root"
+              sequence="10"/>
+
+    <menuitem id="menu_cloudbeds_reservations"
+              name="Reservations"
+              parent="menu_cloudbeds_operations"
+              action="action_cloudbeds_reservation"
+              sequence="10"/>
+
+    <menuitem id="menu_cloudbeds_guests"
+              name="Guests"
+              parent="menu_cloudbeds_operations"
+              action="action_cloudbeds_guests"
+              sequence="20"/>
+
+    <menuitem id="menu_cloudbeds_products"
+              name="Linked Products"
+              parent="menu_cloudbeds_operations"
+              action="action_cloudbeds_products"
+              sequence="30"/>
+
+    <menuitem id="menu_cloudbeds_sync_wizard"
+              name="Manual Sync"
+              parent="menu_cloudbeds_operations"
+              action="action_cloudbeds_sync_wizard"
+              sequence="40"/>
+
+    <!-- ── Reports ─────────────────────────────────── -->
+    <menuitem id="menu_cloudbeds_reports"
+              name="Reports"
+              parent="menu_cloudbeds_root"
+              sequence="50"/>
+
+    <menuitem id="menu_cloudbeds_logs"
+              name="Sync Logs"
+              parent="menu_cloudbeds_reports"
+              action="action_cloudbeds_sync_log"
+              sequence="10"/>
+
+    <!-- ── Configuration ───────────────────────────── -->
+    <menuitem id="menu_cloudbeds_configuration"
+              name="Configuration"
+              parent="menu_cloudbeds_root"
+              sequence="90"/>
+
+    <menuitem id="menu_cloudbeds_backend"
+              name="Backends"
+              parent="menu_cloudbeds_configuration"
+              action="action_cloudbeds_backend"
+              sequence="10"/>
+
+</odoo>

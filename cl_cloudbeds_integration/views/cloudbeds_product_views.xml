@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         product.template — Form Extension (adds CB fields)
+    ============================================================ -->
+    <record id="view_product_template_form_cloudbeds" model="ir.ui.view">
+        <field name="name">product.template.form.cloudbeds</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Cloudbeds" name="cloudbeds"
+                      invisible="not cb_item_id">
+                    <group string="Cloudbeds Sync Info">
+                        <field name="cb_item_id" readonly="1"/>
+                        <field name="cb_backend_id" readonly="1"/>
+                        <field name="cb_sync_date" readonly="1"/>
+                        <field name="cb_service_charge_percentage" widget="percentage" invisible="False" readonly="1"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Linked Products list — product.template filtered to CB items
+    ============================================================ -->
+    <record id="view_cloudbeds_products_list" model="ir.ui.view">
+        <field name="name">cloudbeds.product.list</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <list string="Cloudbeds Linked Products">
+                <field name="name"/>
+                <field name="type"/>
+                <field name="list_price" string="Sales Price"/>
+                <field name="cb_item_id" string="CB Item ID"/>
+                <field name="cb_backend_id" string="Backend"/>
+                <field name="cb_sync_date" string="Last Sync"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Window Action — Linked Products
+    ============================================================ -->
+    <record id="action_cloudbeds_products" model="ir.actions.act_window">
+        <field name="name">Linked Products</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_cloudbeds_products_list')})]"/>
+        <field name="domain">[('cb_item_id', '!=', False)]</field>
+        <field name="context">{'default_type': 'service', 'create': False, 'edit': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No products linked to Cloudbeds yet.
+            </p>
+            <p>
+                Sync products from the backend configuration or process a reservation
+                to auto-create room type and item products.
+            </p>
+        </field>
+    </record>
+
+</odoo>
