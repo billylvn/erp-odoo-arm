@@ -611,7 +611,7 @@ class CloudbedsReservation(models.Model):
                     'product_uom': product.uom_id.id,
                     'product_uom_qty': nights,
                     'price_unit': rate_per_night,
-                    'tax_ids': tax_ids,
+                    'tax_id': tax_ids,
                 })
             ]
 
@@ -624,7 +624,7 @@ class CloudbedsReservation(models.Model):
             line_vals = {
                 'product_uom_qty': 1.0,
                 'price_unit': additional,
-                'tax_ids': tax_ids,
+                'tax_id': tax_ids,
             }
             if adj_product:
                 line_vals['product_id'] = adj_product.id
@@ -644,7 +644,7 @@ class CloudbedsReservation(models.Model):
                 'product_uom': service_charge_product.uom_id.id, 
                 'product_uom_qty': 1.0,
                 'price_unit': service_charge_amount,
-                'tax_ids': [],
+                'tax_id': [],
             }
             order_lines.append(Command.create(line_vals))
 
