@@ -772,6 +772,91 @@ class CloudbedsReservation(models.Model):
 
         return empty
 
+    def _map_payment(self, journal):
+        """
+        Register payment dengan journal yang diberikan dan reconcile dengan invoice.
+
+        Jika sudah ada payment sebelumnya (payment_mapping_status == 'mapped'):
+          - Unreconcile, cancel, dan delete payment lama
+          - Buat payment baru dengan journal baru
+
+        :param journal: account.journal record
+        :raises UserError: jika tidak ada invoice posted
+        """
+        self.ensure_one()
+
+        if not self.invoice_id or self.invoice_id.state != 'posted':
+            raise UserError(
+                _('Reservation %s does not have a posted invoice.') % self.cb_reservation_id
+            )
+
+        if not journal:
+            raise UserError(_('No journal provided for payment mapping.'))
+
+        # ── 1. Bersihkan payment lama jika re-mapping ─────────────────────
+        if self.payment_mapping_status == 'mapped' and self.payment_ids:
+            for payment in self.payment_ids:
+                # Unreconcile receivable lines
+                recv_lines = payment.move_id.line_ids.filtered(
+                    lambda l: l.account_id.account_type == 'asset_receivable'
+                )
+                recv_lines.remove_move_reconcile()
+                # Cancel dan delete
+                try:
+                    payment.move_id.button_cancel()
+                except Exception:
+                    pass
+                payment.move_id.unlink()
+            self.payment_ids.unlink()
+            self.write({'payment_ids': [(5, 0, 0)]})
+
+        # ── 2. Hitung amount ───────────────────────────────────────────────
+        invoice = self.invoice_id
+        amount = invoice.amount_residual
+        if amount <= 0.01:
+            # Invoice sudah lunas di luar wizard — pakai cb_total_paid sebagai referensi
+            amount = self.cb_total_paid
+        if amount <= 0.01:
+            raise UserError(
+                _('Reservation %s: amount to pay is zero or negative.') % self.cb_reservation_id
+            )
+
+        # ── 3. Buat account.payment ────────────────────────────────────────
+        payment_vals = {
+            'payment_type': 'inbound',
+            'partner_type': 'customer',
+            'partner_id': invoice.partner_id.id,
+            'amount': amount,
+            'journal_id': journal.id,
+            'date': invoice.invoice_date or fields.Date.today(),
+            'memo': f'CB/{self.cb_reservation_id}',
+            'currency_id': self.backend_id.currency_id.id,
+        }
+        payment = self.env['account.payment'].create(payment_vals)
+        payment.action_post()
+
+        # ── 4. Reconcile dengan invoice ────────────────────────────────────
+        inv_receivable = invoice.line_ids.filtered(
+            lambda l: l.account_id.account_type == 'asset_receivable'
+            and not l.reconciled
+        )
+        pay_receivable = payment.move_id.line_ids.filtered(
+            lambda l: l.account_id.account_type == 'asset_receivable'
+            and not l.reconciled
+        )
+        if inv_receivable and pay_receivable:
+            (inv_receivable + pay_receivable).reconcile()
+            _logger.info(
+                'Mapped payment %s to reservation %s via journal %s',
+                payment.name, self.cb_reservation_id, journal.name,
+            )
+
+        # ── 5. Update reservation ──────────────────────────────────────────
+        self.write({
+            'payment_ids': [(4, payment.id)],
+            'payment_mapping_status': 'mapped',
+        })
+
     def _create_single_payment(self, invoice, journal, amount, pay_data=None):
         """Create and post a single account.payment, then reconcile with invoice."""
         if not journal or amount <= 0:
@@ -999,6 +1084,19 @@ class CloudbedsReservation(models.Model):
                 'title': _('Processing Complete'),
                 'message': _('Selected reservations have been processed.'),
                 'type': 'success',
+            },
+        }
+
+    def action_open_map_payment_wizard(self):
+        """Buka wizard Map Payment dengan reservasi yang dipilih."""
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Map Payment Journal'),
+            'res_model': 'cloudbeds.map.payment.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_reservation_ids': [(6, 0, self.ids)],
             },
         }
 
