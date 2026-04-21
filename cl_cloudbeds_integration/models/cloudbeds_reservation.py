@@ -122,6 +122,13 @@ class CloudbedsReservation(models.Model):
         readonly=True,
         copy=False,
     )
+    payment_mapping_status = fields.Selection(
+        selection=[('not_mapped', 'Not Mapped'), ('mapped', 'Mapped')],
+        string='Payment Status',
+        default='not_mapped',
+        index=True,
+        readonly=True,
+    )
 
     _sql_constraints = [
         (
