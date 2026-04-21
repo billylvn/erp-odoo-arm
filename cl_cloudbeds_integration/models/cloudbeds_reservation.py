@@ -335,9 +335,6 @@ class CloudbedsReservation(models.Model):
         # Tax from mapping
         tax = backend._map_tax_from_cloudbeds()
 
-        # Journal for payments
-        payment_journal = self.env['cloudbeds.payment.method'].get_journal(backend, 'cash')
-
         # Guest cache: cb_guest_id → res.partner
         guest_ids = list(set(r.cb_guest_id for r in self if r.cb_guest_id))
         guest_map = {}
@@ -354,7 +351,6 @@ class CloudbedsReservation(models.Model):
             'adj_product': adj_product.product_variant_id if adj_product else None,
             'service_charge_product': backend.service_charge_product_id,
             'tax': tax,
-            'payment_journal': payment_journal,
             'guest_map': guest_map,
             'backend': backend,
         }
@@ -502,13 +498,8 @@ class CloudbedsReservation(models.Model):
         return partner
 
     def _sync_payments_if_needed(self, invoice_data, cache):
-        """
-        Register only the payment delta on an existing posted invoice.
-        Does nothing when there is no invoice or auto_register_payments is off.
-        """
-        if not self.backend_id.auto_register_payments:
-            return
-        self._register_payments(self.invoice_id, invoice_data, cache=cache)
+        """Payment registration is handled manually via the Map Payment wizard."""
+        return
 
     def _process_order(self, invoice_data, cache, confirmed=False):
         """Process not_confirmed / confirmed: create SO, optionally confirm."""
@@ -549,15 +540,11 @@ class CloudbedsReservation(models.Model):
         if backend.auto_confirm_invoices and invoice.state == 'draft':
             invoice.action_post()
 
-        payments = self.env['account.payment']
-        if backend.auto_register_payments and invoice.state == 'posted':
-            payments = self._register_payments(invoice, invoice_data, cache=cache)
-
         self.write({
             'partner_id': partner.id,
             'sale_order_id': sale_order.id,
             'invoice_id': invoice.id,
-            'payment_ids': [(6, 0, payments.ids)] if payments else [],
+            'payment_mapping_status': 'not_mapped',
             'state': 'imported',
             'error_message': False,
         })
