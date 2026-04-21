@@ -56,6 +56,10 @@
                             string="Re-Process"
                             type="object"
                             invisible="state != 'imported'"/>
+                    <button name="action_recreate_transaction"
+                            string="Re-Create Transaction"
+                            type="object"
+                            invisible="state != 'imported'"/>
                     <button name="action_register_payment"
                             string="Register Payment"
                             type="object"

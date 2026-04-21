@@ -162,6 +162,7 @@
                                     <field name="sync_guests"/>
                                     <field name="sync_products"/>
                                     <field name="sync_reservations"/>
+                                    <field name="reservation_status" invisible="not sync_reservations"/>
                                 </group>
                             </group>
                         </page>

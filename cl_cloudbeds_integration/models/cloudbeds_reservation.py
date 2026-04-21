@@ -292,15 +292,21 @@ class CloudbedsReservation(models.Model):
         Avoids per-record product/journal/tax lookups.
         """
         cache = self._build_cache(backend)
+        total = len(self)
+        processed = 0
         for rec in self:
+            _logger.info("Processing reservation %s/%s", processed + 1, total)
             try:
                 rec._process(client, cache)
+                processed += 1
+                _logger.info("Processed reservation %s/%s", processed, total)
             except Exception as exc:
                 rec.write({'state': 'error', 'error_message': str(exc)[:250]})
                 _logger.warning(
                     'Failed to process CB reservation %s: %s',
                     rec.cb_reservation_id, exc,
                 )
+        _logger.info("Result: Processed %s/%s reservations", processed, total)
 
     def _build_cache(self, backend):
         """
@@ -345,6 +351,24 @@ class CloudbedsReservation(models.Model):
             'guest_map': guest_map,
             'backend': backend,
         }
+
+    def _delete_transaction(self):
+        """Delete existing transaction for this reservation."""
+        # Delete payment
+        self.payment_ids.move_id.button_cancel()
+        self.payment_ids.move_id.unlink()
+        self.payment_ids.unlink()
+
+        # Delete Invoice
+        self.invoice_id.button_cancel()
+        self.invoice_id.unlink()
+
+        # Delete Sale Order
+        self.sale_order_id._action_cancel()
+        self.sale_order_id.unlink()
+
+        # Set transaction to pending
+        self.state = 'pending'
 
     def _process(self, client=None, cache=None):
         """
@@ -608,10 +632,10 @@ class CloudbedsReservation(models.Model):
             order_lines += [
                 Command.create({
                     'product_id': product.id,
-                    'product_uom_id': product.uom_id.id,
+                    'product_uom': product.uom_id.id,
                     'product_uom_qty': nights,
                     'price_unit': rate_per_night,
-                    'tax_ids': tax_ids,
+                    'tax_id': tax_ids,
                 })
             ]
 
@@ -624,11 +648,11 @@ class CloudbedsReservation(models.Model):
             line_vals = {
                 'product_uom_qty': 1.0,
                 'price_unit': additional,
-                'tax_ids': tax_ids,
+                'tax_id': tax_ids,
             }
             if adj_product:
                 line_vals['product_id'] = adj_product.id
-                line_vals['product_uom_id'] = adj_product.uom_id.id
+                line_vals['product_uom'] = adj_product.uom_id.id
             order_lines.append(Command.create(line_vals))
             base_service_charge += additional
 
@@ -641,10 +665,10 @@ class CloudbedsReservation(models.Model):
             line_vals = {
                 'name': 'Service Charge',
                 'product_id': service_charge_product.id,
-                'product_uom_id': service_charge_product.uom_id.id, 
+                'product_uom': service_charge_product.uom_id.id, 
                 'product_uom_qty': 1.0,
                 'price_unit': service_charge_amount,
-                'tax_ids': [],
+                'tax_id': [],
             }
             order_lines.append(Command.create(line_vals))
 
@@ -658,13 +682,17 @@ class CloudbedsReservation(models.Model):
             'origin': f'CB/{self.cb_reservation_id}',
             'order_line': order_lines,
         })
-        if abs(sale.amount_total - self.cb_total_amount) > 0.01:
-            # Adjust amount total on sale order to cb_total_amount
-            diff = self.cb_total_amount - sale.amount_total
-            # Modify the last line to absorb the difference
-            last_line = sale.order_line[-1:]
-            if last_line:
-                last_line.write({'price_unit': last_line.price_unit + diff})
+        diff = self.cb_total_amount - sale.amount_total
+        if abs(diff) >= 0.005:
+            # Adjust on a tax-free line so the diff maps 1:1 to amount_total
+            no_tax_line = sale.order_line.filtered(lambda l: not l.tax_id)[-1:]
+            if no_tax_line:
+                no_tax_line.write({'price_unit': no_tax_line.price_unit + diff})
+            else:
+                # All lines have tax; compute tax-inclusive factor to offset exactly
+                taxed_line = sale.order_line[-1:]
+                tax_factor = 1.0 + sum(taxed_line.tax_id.mapped('amount')) / 100.0
+                taxed_line.write({'price_unit': taxed_line.price_unit + diff / tax_factor})
         return sale
 
     def _create_invoice_from_so(self, sale_order, invoice_data):
@@ -777,25 +805,39 @@ class CloudbedsReservation(models.Model):
         try:
             payment = self.env['account.payment'].create(payment_vals)
             payment.action_post()
+            payment.action_validate()
             _logger.info(
                 'Created payment for reservation %s: %s (%s)',
                 self.cb_reservation_id, payment.name, amount,
             )
-            # Reconcile payment with invoice via receivable lines
-            inv_receivable = invoice.line_ids.filtered(
-                lambda l: l.account_id.account_type == 'asset_receivable'
-                and not l.reconciled
-            )
-            pay_receivable = payment.move_id.line_ids.filtered(
-                lambda l: l.account_id.account_type == 'asset_receivable'
-                and not l.reconciled
-            )
-            if inv_receivable and pay_receivable:
-                (inv_receivable + pay_receivable).reconcile()
-                _logger.info(
-                    'Reconciled payment %s with invoice %s',
-                    payment.name, invoice.name,
-                )
+            # Reconcile payment with invoice
+            if payment.move_id:
+                pass
+            else:
+                payment.move_id = self.env['account.move'].create({
+                    'journal_id': payment.journal_id.id,
+                    'partner_id': payment.partner_id.id,
+                    'date': payment.date,
+                    'currency_id': payment.currency_id.id,
+                    'line_ids': [Command.create({
+                        'account_id': payment.journal_id.default_account_id.id,
+                        'debit': payment.amount,
+                        'credit': 0,
+                    }),
+                    Command.create({
+                        'account_id': payment.partner_id.property_account_receivable_id.id,
+                        'debit': 0,
+                        'credit': payment.amount,
+                    }),
+                    ]
+                })
+                payment.move_id.action_post()
+                _logger.info('Created payment move for reservation %s: %s', self.cb_reservation_id, payment.move_id.name)
+                payment_line_to_reconcile = payment.move_id.line_ids[-1]
+                invoice_line_to_reconcile = invoice.line_ids.filtered(lambda x: x.account_id.id == payment.partner_id.property_account_receivable_id.id)
+                if payment_line_to_reconcile and invoice_line_to_reconcile:
+                    (payment_line_to_reconcile + invoice_line_to_reconcile).reconcile()
+                    _logger.info('Reconciled payment %s with invoice %s', payment.move_id.name, invoice.name)
 
             return payment
         except Exception as exc:
@@ -931,6 +973,24 @@ class CloudbedsReservation(models.Model):
         """Re-process reservations manually."""
         for res in self:
             try:
+                res._process()
+            except Exception as exc:
+                res.write({'state': 'error', 'error_message': str(exc)[:250]})
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Processing Complete'),
+                'message': _('Selected reservations have been processed.'),
+                'type': 'success',
+            },
+        }
+    
+    def action_recreate_transaction(self):
+        """Recreate transaction for reservations."""
+        for res in self:
+            try:
+                res._delete_transaction()
                 res._process()
             except Exception as exc:
                 res.write({'state': 'error', 'error_message': str(exc)[:250]})

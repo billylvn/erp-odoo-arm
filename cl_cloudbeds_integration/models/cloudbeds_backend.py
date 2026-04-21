@@ -102,6 +102,14 @@ class CloudbedsBackend(models.Model):
         default=True,
         help='Import reservations from Cloudbeds.',
     )
+    reservation_status = fields.Selection(
+        selection=[
+            ('checked_out', 'Checked-Out Only'),
+            ('all', 'All Statuses'),
+        ],
+        string='Reservation Filter',
+        default='checked_out',
+    )
 
     # ------------------------------------------------------------------
     # Accounting settings
@@ -621,7 +629,8 @@ class CloudbedsBackend(models.Model):
 
         if self.sync_reservations:
             try:
-                self.env['cloudbeds.reservation']._import_reservations(self)
+                status_filter = None if self.reservation_status == 'all' else 'checked_out'
+                self.env['cloudbeds.reservation']._import_reservations(self, status=status_filter)
             except Exception as exc:
                 _logger.error('Reservation sync failed: %s', exc, exc_info=True)
 
