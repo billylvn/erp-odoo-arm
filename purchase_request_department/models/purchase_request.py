@@ -19,6 +19,12 @@ class PurchaseRequest(models.Model):
         string="Department",
         default=lambda self: self._get_my_department(),
     )
+    manager_id = fields.Many2one(
+        'res.users', 
+        string='Manager Department', 
+        related="department_id.manager_id.user_id",
+        store=True,
+    )
 
     @api.onchange("requested_by")
     def onchange_requested_by(self):
@@ -35,4 +41,10 @@ class PurchaseRequestLine(models.Model):
         store=True,
         string="Department",
         readonly=True,
+    )
+    manager_id = fields.Many2one(
+        'res.users', 
+        string='Manager Department', 
+        related="request_id.department_id.manager_id.user_id",
+        store=True,
     )

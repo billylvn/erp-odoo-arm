@@ -17,6 +17,7 @@
         <field name="arch" type="xml">
             <field name="requested_by" position="after">
                 <field name="department_id" readonly="state != 'draft'" />
+                <field name="manager_id" />
             </field>
         </field>
     </record>
@@ -44,6 +45,7 @@
         <field name="arch" type="xml">
             <field name="requested_by" position="after">
                 <field name="department_id" />
+                <field name="manager_id" />
             </field>
         </field>
     </record>
@@ -54,6 +56,7 @@
         <field name="arch" type="xml">
             <field name="requested_by" position="after">
                 <field name="department_id" readonly="request_state != 'draft'" />
+                <field name="manager_id" />
             </field>
         </field>
     </record>
@@ -64,6 +67,7 @@
         <field name="arch" type="xml">
             <field name="requested_by" position="after">
                 <field name="department_id" />
+                <field name="manager_id" />
             </field>
             <xpath expr="//group[1]" position="inside">
                 <filter
