@@ -413,16 +413,20 @@ class CloudbedsReservation(models.Model):
 
             if self.cb_status == 'not_confirmed':
                 self._process_order(invoice_data, cache, confirmed=False)
+                # Payment registration is handled manually via the Map Payment wizard.
                 self._sync_payments_if_needed(invoice_data, cache)
             elif self.cb_status == 'confirmed':
                 self._process_order(invoice_data, cache, confirmed=True)
+                # Payment registration is handled manually via the Map Payment wizard.
                 self._sync_payments_if_needed(invoice_data, cache)
             elif self.cb_status == 'checked_in':
+                # Payment registration is handled manually via the Map Payment wizard.
                 self._sync_payments_if_needed(invoice_data, cache)
                 self.write({'state': 'imported', 'error_message': False})
             elif self.cb_status == 'checked_out':
                 if grand_total > 0 and backend.auto_invoice_on_checkout:
                     if self.invoice_id:
+                        # Payment registration is handled manually via the Map Payment wizard.
                         self._sync_payments_if_needed(invoice_data, cache)
                         self.write({'state': 'imported', 'error_message': False})
                     else:
@@ -524,7 +528,9 @@ class CloudbedsReservation(models.Model):
     def _process_checkout(self, invoice_data, cache):
         """
         Full pipeline for a checked-out reservation:
-        guest → sale order → invoice → post → payment → reconcile
+        guest → sale order → invoice → post.
+
+        Payment registration is deferred to the Map Payment wizard.
         """
         self.ensure_one()
         backend = self.backend_id
@@ -751,9 +757,7 @@ class CloudbedsReservation(models.Model):
         if payment_amount <= 0.01:
             return empty
 
-        journal = (
-            cache.get('payment_journal') if cache else None
-        ) or self.env['cloudbeds.payment.method'].get_journal(backend, 'cash')
+        journal = self.env['cloudbeds.payment.method'].get_journal(backend, 'cash')
         payment_ref = f'CB/{self.cb_reservation_id}'
         if balance > 0:
             payment_ref += f' (partial — balance {balance:,.0f})'
