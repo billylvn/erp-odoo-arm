@@ -124,7 +124,7 @@ class CloudbedsReservation(models.Model):
     )
     payment_mapping_status = fields.Selection(
         selection=[('not_mapped', 'Not Mapped'), ('mapped', 'Mapped')],
-        string='Payment Status',
+        string='Payment Mapping Status',
         default='not_mapped',
         index=True,
         readonly=True,
