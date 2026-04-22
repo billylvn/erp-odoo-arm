@@ -11,3 +11,4 @@ access_cloudbeds_reservation_manager,cloudbeds.reservation manager,model_cloudbe
 access_cloudbeds_reservation_user,cloudbeds.reservation user,model_cloudbeds_reservation,base.group_user,1,0,0,0
 access_cloudbeds_sync_wizard_user,cloudbeds.sync.wizard user,model_cloudbeds_sync_wizard,base.group_user,1,1,1,1
 access_cloudbeds_payment_wizard_user,cloudbeds.payment.wizard user,model_cloudbeds_payment_wizard,base.group_user,1,1,1,1
+access_cloudbeds_map_payment_wizard_user,cloudbeds.map.payment.wizard user,model_cloudbeds_map_payment_wizard,base.group_user,1,1,1,1
