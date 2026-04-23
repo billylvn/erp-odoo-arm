@@ -125,9 +125,9 @@ class CloudbedsBackend(models.Model):
         help='Post (confirm) invoices automatically after creation.',
     )
     auto_register_payments = fields.Boolean(
-        string='Auto-Register Payments',
+        string='Auto-Register Payments (Deprecated)',
         default=True,
-        help='Register account.payment entries for each Cloudbeds payment automatically.',
+        help='This setting is no longer active. Payment registration is now done manually via the Map Payment Journal wizard.',
     )
     revenue_journal_id = fields.Many2one(
         comodel_name='account.journal',

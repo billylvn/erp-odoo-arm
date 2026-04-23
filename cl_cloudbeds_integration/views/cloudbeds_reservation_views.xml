@@ -64,10 +64,15 @@
                             string="Re-Create Transaction"
                             type="object"
                             invisible="state != 'imported'"/>
+                    <button name="action_open_map_payment_wizard"
+                            string="Map Payment"
+                            type="object"
+                            class="btn-primary"
+                            invisible="invoice_id == False or payment_mapping_status == 'mapped'"
+                            title="Assign payment journal and reconcile with invoice"/>
                     <button name="action_register_payment"
                             string="Register Payment"
                             type="object"
-                            class="btn-primary"
                             invisible="cb_balance &lt;= 0"
                             title="Register a new payment in Cloudbeds and Odoo"/>
                     <field name="state" widget="statusbar"
