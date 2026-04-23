@@ -550,7 +550,7 @@ class CloudbedsReservation(models.Model):
             'partner_id': partner.id,
             'sale_order_id': sale_order.id,
             'invoice_id': invoice.id,
-            'payment_mapping_status': 'not_mapped',
+            'payment_mapping_status': self.payment_mapping_status or 'not_mapped',
             'state': 'imported',
             'error_message': False,
         })
@@ -724,6 +724,9 @@ class CloudbedsReservation(models.Model):
     # Payment registration
     # ------------------------------------------------------------------
 
+    # NOTE: This method is no longer called from the automated sync pipeline.
+    # Payment registration is now handled manually via the Map Payment wizard (_map_payment).
+    # Kept for potential external use or future re-activation.
     def _register_payments(self, invoice, invoice_data, cache=None):
         """
         Register only the *delta* between what Cloudbeds says is paid and what
@@ -794,21 +797,15 @@ class CloudbedsReservation(models.Model):
             raise UserError(_('No journal provided for payment mapping.'))
 
         # ── 1. Bersihkan payment lama jika re-mapping ─────────────────────
-        if self.payment_mapping_status == 'mapped' and self.payment_ids:
+        if self.payment_ids:
             for payment in self.payment_ids:
-                # Unreconcile receivable lines
+                # Unreconcile receivable lines sebelum cancel
                 recv_lines = payment.move_id.line_ids.filtered(
                     lambda l: l.account_id.account_type == 'asset_receivable'
                 )
                 recv_lines.remove_move_reconcile()
-                # Cancel dan delete
-                try:
-                    payment.move_id.button_cancel()
-                except Exception:
-                    pass
-                payment.move_id.unlink()
+            # account.payment.unlink() handles move cancel + delete atomically
             self.payment_ids.unlink()
-            self.write({'payment_ids': [(5, 0, 0)]})
 
         # ── 2. Hitung amount ───────────────────────────────────────────────
         invoice = self.invoice_id
@@ -830,7 +827,7 @@ class CloudbedsReservation(models.Model):
             'journal_id': journal.id,
             'date': invoice.invoice_date or fields.Date.today(),
             'memo': f'CB/{self.cb_reservation_id}',
-            'currency_id': self.backend_id.currency_id.id,
+            'currency_id': (self.backend_id.currency_id or self.env.company.currency_id).id,
         }
         payment = self.env['account.payment'].create(payment_vals)
         payment.action_post()
