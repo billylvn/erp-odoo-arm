@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Cloudbeds Integration',
-    'version': '18.0.1.0.0',
+    'version': '18.0.1.1.0',
     'category': 'Accounting/Accounting',
     'summary': (
         'Full Odoo 18 integration with Cloudbeds: reservations, '
@@ -14,7 +14,9 @@ Connect Odoo 18 with Cloudbeds hotel management system end-to-end.
 
 **Accounting**
 * Import Cloudbeds reservations → Odoo invoices automatically on checkout
-* Map payment journal manually via Map Payment wizard (multi-select from list view)
+* Payment mapping mode (manual / automatic):
+    - Manual: assign journal via the Map Payment wizard (multi-select from list view)
+    - Automatic: payment auto-created and reconciled using a configured journal on get reservation
 * Create credit notes when reservations are cancelled after invoicing
 * Map Cloudbeds taxes → Odoo account.tax
 * Map payment methods → accounting journals
@@ -23,7 +25,7 @@ Connect Odoo 18 with Cloudbeds hotel management system end-to-end.
 **Reservations**
 * Full folio import: room charges, service items, taxes, payments, adjustments
 * All statuses handled: not_confirmed, confirmed, checked_in, checked_out, canceled, no_show
-* Sale Order → Invoice pipeline automatic on checkout; payment assigned manually via wizard
+* Sale Order → Invoice pipeline automatic on checkout; payment assigned manually via wizard or automatically per backend configuration
 * Idempotent imports — safe to run repeatedly
 
 **Products**

@@ -7,7 +7,7 @@ Jalankan:
 """
 from unittest.mock import patch
 from odoo.tests.common import TransactionCase
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class TestMapPayment(TransactionCase):
@@ -210,3 +210,104 @@ class TestMapPayment(TransactionCase):
         """_build_cache tidak boleh lagi memuat payment_journal."""
         cache = self.env['cloudbeds.reservation']._build_cache(self.backend)
         self.assertNotIn('payment_journal', cache)
+
+    # ── Auto-map (payment_mapping_mode) tests ─────────────────────────────
+
+    def test_auto_map_runs_in_automatic_mode(self):
+        """Automatic mode harus auto-create payment + set status mapped."""
+        self.backend.write({
+            'payment_mapping_mode': 'automatic',
+            'auto_payment_journal_id': self.journal_cash.id,
+        })
+        invoice = self._create_posted_invoice(amount=250000.0)
+        reservation = self._create_reservation(invoice, paid=250000.0)
+
+        reservation._auto_map_payment_if_enabled()
+
+        self.assertEqual(reservation.payment_mapping_status, 'mapped')
+        self.assertEqual(len(reservation.payment_ids), 1)
+        self.assertEqual(reservation.payment_ids.journal_id, self.journal_cash)
+
+    def test_auto_map_skipped_in_manual_mode(self):
+        """Manual mode harus tidak buat payment apapun."""
+        self.backend.write({'payment_mapping_mode': 'manual'})
+        invoice = self._create_posted_invoice()
+        reservation = self._create_reservation(invoice)
+
+        reservation._auto_map_payment_if_enabled()
+
+        self.assertEqual(reservation.payment_mapping_status, 'not_mapped')
+        self.assertFalse(reservation.payment_ids)
+
+    def test_auto_map_skipped_when_already_mapped(self):
+        """Reservasi sudah mapped tidak boleh di-remap otomatis."""
+        self.backend.write({
+            'payment_mapping_mode': 'automatic',
+            'auto_payment_journal_id': self.journal_cash.id,
+        })
+        invoice = self._create_posted_invoice(amount=180000.0)
+        reservation = self._create_reservation(invoice, paid=180000.0)
+
+        # First auto-map
+        reservation._auto_map_payment_if_enabled()
+        first_payment_id = reservation.payment_ids.id
+
+        # Second call — must be a no-op
+        reservation._auto_map_payment_if_enabled()
+        self.assertEqual(len(reservation.payment_ids), 1)
+        self.assertEqual(reservation.payment_ids.id, first_payment_id)
+
+    def test_auto_map_skipped_when_total_paid_zero(self):
+        """cb_total_paid=0 (belum dibayar) harus dilewati di automatic mode."""
+        self.backend.write({
+            'payment_mapping_mode': 'automatic',
+            'auto_payment_journal_id': self.journal_cash.id,
+        })
+        invoice = self._create_posted_invoice()
+        reservation = self._create_reservation(invoice, paid=0.0)
+
+        reservation._auto_map_payment_if_enabled()
+
+        self.assertEqual(reservation.payment_mapping_status, 'not_mapped')
+        self.assertFalse(reservation.payment_ids)
+
+    def test_auto_map_skipped_when_invoice_not_posted(self):
+        """Invoice draft tidak boleh memicu auto-map."""
+        self.backend.write({
+            'payment_mapping_mode': 'automatic',
+            'auto_payment_journal_id': self.journal_cash.id,
+        })
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner.id,
+            'invoice_line_ids': [(0, 0, {
+                'product_id': self.product.id,
+                'quantity': 1,
+                'price_unit': 100000.0,
+                'account_id': self.account_revenue.id,
+            })],
+        })
+        # invoice tetap draft
+        reservation = self._create_reservation(invoice)
+
+        reservation._auto_map_payment_if_enabled()
+
+        self.assertEqual(reservation.payment_mapping_status, 'not_mapped')
+        self.assertFalse(reservation.payment_ids)
+
+    def test_constraint_automatic_requires_journal(self):
+        """Mode automatic tanpa journal harus raise ValidationError."""
+        with self.assertRaises(ValidationError):
+            self.backend.write({
+                'payment_mapping_mode': 'automatic',
+                'auto_payment_journal_id': False,
+            })
+
+    def test_constraint_manual_does_not_require_journal(self):
+        """Mode manual tanpa journal harus diperbolehkan."""
+        # Tidak raise — sukses
+        self.backend.write({
+            'payment_mapping_mode': 'manual',
+            'auto_payment_journal_id': False,
+        })
+        self.assertEqual(self.backend.payment_mapping_mode, 'manual')

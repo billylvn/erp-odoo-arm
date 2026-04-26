@@ -7,7 +7,7 @@ Covers: OAuth2, guest sync, product sync, reservations → invoices + payments.
 """
 import logging
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -124,10 +124,25 @@ class CloudbedsBackend(models.Model):
         default=True,
         help='Post (confirm) invoices automatically after creation.',
     )
-    auto_register_payments = fields.Boolean(
-        string='Auto-Register Payments (Deprecated)',
-        default=True,
-        help='This setting is no longer active. Payment registration is now done manually via the Map Payment Journal wizard.',
+    payment_mapping_mode = fields.Selection(
+        selection=[('manual', 'Manual'), ('automatic', 'Automatic')],
+        string='Payment Mapping Mode',
+        default='manual',
+        required=True,
+        tracking=True,
+        help=(
+            'Manual: payments are mapped via the Map Payment wizard.\n'
+            'Automatic: payment is auto-created and reconciled with the '
+            'invoice using the configured journal when a reservation is '
+            'fetched.'
+        ),
+    )
+    auto_payment_journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        string='Auto Payment Journal',
+        domain="[('type', 'in', ['cash', 'bank'])]",
+        tracking=True,
+        help='Journal used to auto-create payments when Payment Mapping Mode is Automatic.',
     )
     revenue_journal_id = fields.Many2one(
         comodel_name='account.journal',
@@ -181,6 +196,18 @@ class CloudbedsBackend(models.Model):
         string='Sync Logs',
         compute='_compute_sync_log_count',
     )
+
+    # ------------------------------------------------------------------
+    # Constraints
+    # ------------------------------------------------------------------
+
+    @api.constrains('payment_mapping_mode', 'auto_payment_journal_id')
+    def _check_auto_payment_journal(self):
+        for rec in self:
+            if rec.payment_mapping_mode == 'automatic' and not rec.auto_payment_journal_id:
+                raise ValidationError(_(
+                    'Auto Payment Journal is required when Payment Mapping Mode is Automatic.'
+                ))
 
     def _compute_reservation_count(self):
         for rec in self:

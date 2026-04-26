@@ -502,8 +502,33 @@ class CloudbedsReservation(models.Model):
         return partner
 
     def _sync_payments_if_needed(self, invoice_data, cache):
-        """Payment registration is handled manually via the Map Payment wizard."""
-        return
+        """
+        Trigger auto payment mapping when backend is in automatic mode.
+        In manual mode this is a no-op — user maps via the Map Payment wizard.
+        """
+        self._auto_map_payment_if_enabled()
+
+    def _auto_map_payment_if_enabled(self):
+        """
+        Auto-map payment using the backend's configured journal when
+        payment_mapping_mode = 'automatic'. Idempotent: skips when already
+        mapped, when the invoice is not posted, or when there is nothing
+        paid on the Cloudbeds side.
+        """
+        self.ensure_one()
+        backend = self.backend_id
+        if backend.payment_mapping_mode != 'automatic':
+            return
+        if self.payment_mapping_status == 'mapped':
+            return
+        if not self.invoice_id or self.invoice_id.state != 'posted':
+            return
+        if (self.cb_total_paid or 0) <= 0:
+            return
+        # Defensive — @api.constrains on the backend already guarantees this.
+        if not backend.auto_payment_journal_id:
+            return
+        self._map_payment(backend.auto_payment_journal_id)
 
     def _process_order(self, invoice_data, cache, confirmed=False):
         """Process not_confirmed / confirmed: create SO, optionally confirm."""
@@ -554,6 +579,8 @@ class CloudbedsReservation(models.Model):
             'state': 'imported',
             'error_message': False,
         })
+
+        self._auto_map_payment_if_enabled()
 
     def _process_cancellation(self, invoice_data):
         """
@@ -831,6 +858,7 @@ class CloudbedsReservation(models.Model):
         }
         payment = self.env['account.payment'].create(payment_vals)
         payment.action_post()
+        payment.action_validate()
 
         # ── 4. Reconcile dengan invoice ────────────────────────────────────
         inv_receivable = invoice.line_ids.filtered(

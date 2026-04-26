@@ -120,9 +120,10 @@
                                     <field name="currency_id" options="{'create': False}"/>
                                     <field name="auto_invoice_on_checkout"/>
                                     <field name="auto_confirm_invoices"/>
-                                    <field name="auto_register_payments"
-                                           class="text-muted"
-                                           string="Auto-Register Payments (Deprecated — use Map Payment wizard)"/>
+                                    <field name="payment_mapping_mode" widget="radio"/>
+                                    <field name="auto_payment_journal_id"
+                                           invisible="payment_mapping_mode != 'automatic'"
+                                           required="payment_mapping_mode == 'automatic'"/>
                                 </group>
                                 <group string="Product Mapping">
                                     <field name="service_charge_product_id" />
